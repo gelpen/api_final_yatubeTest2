@@ -10,10 +10,11 @@ class PostSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
+    image = serializers.ImageField(required=False)  # Добавлено поле image
 
     class Meta:
         model = Post
-        fields = ('id', 'text', 'pub_date', 'author', 'group')
+        fields = ('id', 'text', 'pub_date', 'author', 'group', 'image')  # Добавлено поле image
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -47,7 +48,8 @@ class FollowSerializer(serializers.ModelSerializer):
         validators = [
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
-                fields=('user', 'following')
+                fields=['user', 'following'],
+                message="You are already following this user."
             )
         ]
 

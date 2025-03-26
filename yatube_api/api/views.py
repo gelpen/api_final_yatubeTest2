@@ -1,6 +1,9 @@
 from rest_framework import viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework import filters
+from django.db import IntegrityError
+from rest_framework.response import Response
+from rest_framework import status
 
 from posts.models import Group, Post
 from .serializers import (CommentSerializer, GroupSerializer,
@@ -44,7 +47,13 @@ class FollowViewSet(ListCreateViewSet):
     search_fields = ('following__username', 'user__username')
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        try:
+            serializer.save(user=self.request.user)
+        except IntegrityError:
+            return Response(
+                {"detail": "You are already following this user."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     def get_queryset(self):
         return self.request.user.follower.all()
